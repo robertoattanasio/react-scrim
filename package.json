@@ -1,0 +1,26 @@
+{
+  "name": "react-scrim",
+  "version": "0.0.0",
+  "description": "CSS-native scrim driven by data attributes.",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Roberto Attanasio",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "ts:check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

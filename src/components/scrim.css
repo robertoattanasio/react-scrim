@@ -1,0 +1,13 @@
+[data-scrim] {
+  position: fixed;
+  inset: 0;
+  visibility: hidden;
+}
+
+[data-scrim][data-scrim-open] {
+  visibility: visible;
+}
+
+[data-scrim][data-scrim-instant] {
+  transition: none;
+}
