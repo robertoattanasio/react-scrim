@@ -65,6 +65,8 @@ React 19 and TypeScript, nothing else: no dependencies, no runtime beyond React 
 - **Transitions, not keyframes.** Everything stays interruptible: navigate mid-animation and it reverses instead of restarting.
 - **No timing in JavaScript.** The library never reads or holds a duration. If you need to wait for the scrim, read the value from your own CSS.
 
+Conventions for contributing: [RULE.md](./RULE.md).
+
 ## License
 
 [MIT](./LICENSE).
