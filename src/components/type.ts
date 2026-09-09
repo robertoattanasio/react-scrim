@@ -4,6 +4,10 @@ export type ScrimSignal = () => unknown;
 
 export type ScrimProps = ComponentProps<"div"> & {
   until?: ScrimSignal;
-  open?: boolean;
+  isLoading?: boolean;
+  isReady?: boolean;
   variant?: string;
+  onReady?: () => void;
+  onLoading?: (isLoading: boolean) => void;
+  onScreen?: (isOnScreen: boolean) => void;
 };

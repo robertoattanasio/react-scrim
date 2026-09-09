@@ -34,6 +34,9 @@ index.ts        the only barrel
 | component  | `PascalCase`         | `Scrim`                |
 | props type | `<Component>Props`   | `ScrimProps`           |
 | attribute  | `data-scrim-<state>` | `data-scrim-ready`     |
+| prop in    | `is<State>`          | `isLoading`            |
+| prop out   | `on<State>`          | `onLoading`            |
+| state      | `_is<State>`         | `_isLoading`           |
 
 Attributes are named for the state they describe, never for what the consumer should do about it. `data-scrim-instant` says "apply this without animating", not "skip the fade".
 
@@ -47,9 +50,9 @@ The instant reset is `transition: none`, not a pair of zeroed duration and delay
 
 The component holds two pieces of state and no more.
 
-`isReady` latches when `until` resolves and never goes back, so `data-scrim-ready` is safe to style against for anything that must stay revealed.
+`_isReady` latches when `until` resolves and never goes back, so `data-scrim-ready` is safe to style against for anything that must stay revealed.
 
-`isArmed` exists for one reason: opening applies the incoming variant unanimated for one frame, then opens. Without it a transition starts from wherever the previous variant parked the element, and a variant that fades leaves nothing for a variant that slides to animate from.
+`_isLoading` is the armed flag, and it exists for one reason: opening applies the incoming variant unanimated for one frame, then opens. Without it a transition starts from wherever the previous variant parked the element, and a variant that fades leaves nothing for a variant that slides to animate from.
 
 That frame is two `requestAnimationFrame` calls. A forced reflow inside the effect reads deterministic but is not enough here: React commits the parked render and the arming update close enough that the browser collapses them into one style recalculation, and the transition loses its starting point.
 
