@@ -29,6 +29,9 @@
     "src",
     "css.d.ts"
   ],
+  "workspaces": [
+    "."
+  ],
   "sideEffects": [
     "**/*.css"
   ],
