@@ -1,7 +1,7 @@
 {
   "name": "react-scrim",
-  "version": "0.2.0",
-  "description": "CSS-native scrim for React: a covering layer whose state is data attributes, so the animation stays in your stylesheet.",
+  "version": "0.3.0",
+  "description": "A scrim for React: a provider owns the cover/uncover lifecycle and its timing, a hook reports it, and the animation stays in your stylesheet.",
   "keywords": [
     "react",
     "scrim",

@@ -4,7 +4,7 @@
   visibility: hidden;
 }
 
-[data-scrim][data-scrim-open] {
+[data-scrim]:not([data-scrim-phase="closed"]) {
   visibility: visible;
 }
 

@@ -1,13 +1,30 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 
-export type ScrimSignal = () => unknown;
+export type ScrimPhase = "closed" | "opening" | "open" | "holding" | "closing";
 
-export type ScrimProps = ComponentProps<"div"> & {
-  until?: ScrimSignal;
-  isLoading?: boolean;
-  isReady?: boolean;
-  variant?: string;
-  onReady?: () => void;
-  onLoading?: (isLoading: boolean) => void;
-  onScreen?: (isOnScreen: boolean) => void;
+export type ScrimState = {
+  phase: ScrimPhase;
+  isReady: boolean;
+  isOpening: boolean;
+  isOpen: boolean;
+  isHolding: boolean;
+  isClosing: boolean;
+  isClosed: boolean;
+  duration: number;
+  hold: number;
+  open: () => void;
+  close: () => void;
+};
+
+export type ReactScrimProviderProps = {
+  children: ReactNode;
+  duration?: number;
+  hold?: number;
+  until?: () => unknown;
+};
+
+export type ScrimProps = ComponentProps<"div">;
+
+export type ScrimStyle = CSSProperties & {
+  "--scrim-duration": string;
 };

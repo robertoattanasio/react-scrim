@@ -1,67 +1,72 @@
 # Conventions
 
-How react-scrim is written. The library is one component and three CSS rules, and these are the rules that keep it that way.
+How react-scrim is written. A provider, a hook, a layer component, and three CSS rules.
 
 ## The approach
 
-**Data attributes are the API.** The component owns state and writes it to the element. It never owns appearance. Which properties animate, for how long, with what curve, and whether a variant slides or fades is CSS the consumer writes. A feature that can be expressed as an attribute the stylesheet reacts to is not a prop.
+**The provider owns the lifecycle.** `ReactScrimProvider` holds the phase and the timers between phases. `<Scrim>` renders that phase and holds no state. A consumer drives the scrim with `open()` / `close()` and reads it with `useReactScrim()` — never a timer of its own.
 
-**Nothing about routing enters the library.** No loader, no route options, no delay, no promise handed to a router. The scrim is told when to cover through `open`; who decides that, and what has to wait for it, is the application's problem.
+**Timing is a prop, in one place.** `duration` and `delay` are props on the provider, mirrored onto the layer as `--scrim-duration` / `--scrim-delay` for the stylesheet and used for the phase timers. The library never reads a time back out of CSS.
 
-**No duration lives in JavaScript.** The library never reads, stores or parses a time. A consumer that must wait for the scrim reads the value from its own stylesheet.
+**Appearance is CSS.** The component writes state to the element as attributes and never owns appearance.
 
-**Correct at first paint.** The scrim covers in the server-rendered HTML. State that only exists after hydration cannot express itself in the served markup, which is how a flash of content gets in.
+**Nothing about routing enters the library.** `until` answers one question — is the app ready for its first reveal. Everything after is `open()` / `close()` called by the app.
 
-**Transitions, not keyframes.** Keyframes would let each variant declare its own start, but they restart instead of reversing when a transition is interrupted mid-flight. Reversibility wins.
+**Correct at first paint.** With `until`, the scrim covers in the server-rendered HTML.
+
+**Transitions, not keyframes.** They reverse instead of restarting when interrupted.
 
 ## Files
 
-Flat under `src/`, in `snake_case`:
+Flat under `src/`, `snake_case`:
 
 ```
 components/
-  scrim.tsx     the component
-  scrim.css     the mechanism, nothing else
-  type.ts       its props
-index.ts        the only barrel
+  provider.tsx    ReactScrimProvider: the state machine
+  scrim.tsx       the layer, renders the phase
+  use_scrim.ts    useReactScrim
+  context.ts      the context object
+  scrim.css       the mechanism, nothing else
+  type.ts         the public types
+index.ts          the only barrel
 ```
 
 ## Naming
 
-| what       | convention           | example                |
-| ---------- | -------------------- | ---------------------- |
-| file       | `snake_case`         | `components/scrim.tsx` |
-| component  | `PascalCase`         | `Scrim`                |
-| props type | `<Component>Props`   | `ScrimProps`           |
-| attribute  | `data-scrim-<state>` | `data-scrim-ready`     |
-| prop in    | `is<State>`          | `isLoading`            |
-| prop out   | `on<State>`          | `onLoading`            |
-| state      | `_is<State>`         | `_isLoading`           |
+| what       | convention          | example                       |
+| ---------- | ------------------- | ----------------------------- |
+| file       | `snake_case`        | `components/provider.tsx`     |
+| component  | `PascalCase`        | `Scrim`, `ReactScrimProvider` |
+| hook       | `use<Name>`         | `useReactScrim`               |
+| props type | `<Component>Props`  | `ScrimProps`                  |
+| attribute  | `data-scrim-<name>` | `data-scrim-open`             |
+| phase      | one lowercase word  | `opening`                     |
+| flag out   | `is<Phase>`         | `isClosing`                   |
 
-Attributes are named for the state they describe, never for what the consumer should do about it. `data-scrim-instant` says "apply this without animating", not "skip the fade".
+## The phase
+
+`closed → opening → open → holding → closing → closed`. `opening`, `holding` and `closing` each run for `duration`; `open` and `closed` are rest states.
+
+`open()` goes to `opening`, then `open`. `close()` goes to `holding` (splash content animates out here, scrim still covering), then `closing` (the layer moves), then `closed`. After `until` resolves the provider stays at `open` for `hold` ms, then calls `close()` itself. `data-scrim-open` stays through `holding` and drops at `closing`, so the layer and anything else keyed to `isClosing` start together.
+
+The hook exposes `phase`, the five phase flags (`isOpening`, `isOpen`, `isHolding`, `isClosing`, `isClosed`), and `isReady`. Nothing else: a consumer that wants "the scrim is in front" writes `isOpening || isOpen || isHolding`.
+
+`isReady` latches when `until` resolves and never goes back. Until it latches, `open()` and `close()` do nothing — the initial reveal is a phase the provider owns end to end, so a caller wiring navigation never has to know the splash is still up.
 
 ## The stylesheet
 
-`scrim.css` carries only what makes a scrim a scrim: it covers the viewport, it is shown when open, and it applies instantly when told to. Everything else is the consumer's.
+`scrim.css` carries only what makes a scrim a scrim: it covers the viewport, it is visible unless the phase is `closed`, and it applies instantly while `data-scrim-instant`. Everything else is the consumer's.
 
-The instant reset is `transition: none`, not a pair of zeroed duration and delay. A consumer rule like `[data-scrim-variant="x"]:not([data-scrim-open])` has the same specificity and comes later in the cascade, so it would win on `transition-delay` and the state would apply late. Zeroing `transition-property` cannot be overridden that way.
+The instant reset is `transition: none`, not zeroed duration and delay. A consumer rule like `[data-scrim-phase="opening"]:not([data-scrim-open])` has the same specificity and comes later in the cascade, so it would win on `transition-delay`. Zeroing `transition-property` can't be overridden that way.
 
-## State
+## No imperative DOM
 
-The component holds two pieces of state and no more.
-
-`_isReady` latches when `until` resolves and never goes back, so `data-scrim-ready` is safe to style against for anything that must stay revealed.
-
-`_isLoading` is the armed flag, and it exists for one reason: opening applies the incoming variant unanimated for one frame, then opens. Without it a transition starts from wherever the previous variant parked the element, and a variant that fades leaves nothing for a variant that slides to animate from.
-
-That frame is two `requestAnimationFrame` calls. A forced reflow inside the effect reads deterministic but is not enough here: React commits the parked render and the arming update close enough that the browser collapses them into one style recalculation, and the transition loses its starting point.
-
-No imperative DOM writes. The component renders attributes; it never sets them on `document.documentElement` or reaches for the element to change its style.
+The provider holds state; `<Scrim>` renders it. Neither touches `document.documentElement` or the element's style directly.
 
 ## Comments
 
-None in the code. The reasoning lives here and in the documentation site.
+None in the code. The reasoning lives here and on the documentation site.
 
 ## Breaking changes
 
-The attribute names are the public surface, more than the props are: consumers style against them. Renaming one, or changing when it appears, is a major even though the TypeScript signature did not move.
+The attribute names and the hook's fields are the public surface, more than the props are. Renaming one, or changing when a phase or attribute appears, is a major.
