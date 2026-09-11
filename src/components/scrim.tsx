@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import type { ScrimProps } from "./type.js";
@@ -9,53 +10,84 @@ export const Scrim = ({
   isLoading = false,
   isReady = false,
   variant,
-  onReady,
-  onLoading,
-  onScreen,
+  durationTime,
+  holdTime,
+  onStatus,
   children,
+  style,
   ...rest
 }: ScrimProps) => {
   const [_isReady, _setIsReady] = useState(isReady);
   const [_isLoading, _setIsLoading] = useState(false);
 
+  const isOnScreen = !_isReady || (isLoading && _isLoading);
+  const [_isCovering, _setIsCovering] = useState(isOnScreen);
+
   const _onLoading = useEffectEvent((value: boolean) => {
     _setIsLoading(value);
-    onLoading && onLoading(value);
+    onStatus && onStatus(value ? "loading" : "idle");
   });
 
   const _onReady = useEffectEvent(() => {
     _setIsReady(true);
-    onReady && onReady();
+    onStatus && onStatus("ready");
   });
 
   const _onScreen = useEffectEvent((value: boolean) => {
-    onScreen && onScreen(value);
+    onStatus && onStatus(value ? "covering" : "uncovering");
   });
 
-  const isOnScreen = !_isReady || (isLoading && _isLoading);
+  const scrimStyle: CSSProperties = {
+    ...style,
+    ...(durationTime !== undefined && { "--scrim-duration": `${durationTime}ms` }),
+  };
 
   useEffect(() => {
     if (isReady) return _onReady();
-    Promise.resolve(until?.()).then(_onReady);
+
+    let cancelled = false;
+    Promise.resolve(until?.()).then(() => {
+      if (!cancelled) _onReady();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [until, isReady]);
 
   useEffect(() => {
     if (!isLoading) return _onLoading(false);
-    const frame = requestAnimationFrame(() => requestAnimationFrame(() => _onLoading(true)));
-    return () => cancelAnimationFrame(frame);
+
+    let inner: number | undefined;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => _onLoading(true));
+    });
+
+    return () => {
+      cancelAnimationFrame(outer);
+      if (inner !== undefined) cancelAnimationFrame(inner);
+    };
   }, [isLoading, variant]);
 
   useEffect(() => {
-    _onScreen(isOnScreen);
-  }, [isOnScreen]);
+    if (isOnScreen) return _setIsCovering(true);
+
+    const timeout = window.setTimeout(() => _setIsCovering(false), holdTime ?? 0);
+    return () => window.clearTimeout(timeout);
+  }, [isOnScreen, holdTime]);
+
+  useEffect(() => {
+    _onScreen(_isCovering);
+  }, [_isCovering]);
 
   return (
     <div
       {...rest}
+      style={scrimStyle}
       aria-hidden={true}
       role="presentation"
       data-scrim=""
-      data-scrim-open={isOnScreen || undefined}
+      data-scrim-open={_isCovering || undefined}
       data-scrim-instant={!_isReady || (isLoading && !_isLoading) || undefined}
       data-scrim-ready={_isReady || undefined}
       data-scrim-variant={variant}

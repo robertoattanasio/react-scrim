@@ -2,6 +2,7 @@
   position: fixed;
   inset: 0;
   visibility: hidden;
+  transition-duration: var(--scrim-duration, 300ms);
 }
 
 [data-scrim][data-scrim-open] {
