@@ -1,5 +1,11 @@
 # react-scrim
 
+## 0.3.1
+
+### Patch Changes
+
+- Run the component's effects as layout effects (`useLayoutEffect` instead of `useEffect`), so the state they set is applied before the browser paints.
+
 ## 0.3.0
 
 ### Breaking Changes
