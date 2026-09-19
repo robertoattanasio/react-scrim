@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffectEvent, useLayoutEffect, useState } from "react";
 
 import type { ScrimProps } from "./type.js";
 
@@ -42,7 +42,7 @@ export const Scrim = ({
     ...(durationTime !== undefined && { "--scrim-duration": `${durationTime}ms` }),
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isReady) return _onReady();
 
     let cancelled = false;
@@ -55,7 +55,7 @@ export const Scrim = ({
     };
   }, [until, isReady]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isLoading) return _onLoading(false);
 
     let inner: number | undefined;
@@ -69,14 +69,14 @@ export const Scrim = ({
     };
   }, [isLoading, variant]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOnScreen) return _setIsCovering(true);
 
     const timeout = window.setTimeout(() => _setIsCovering(false), holdTime ?? 0);
     return () => window.clearTimeout(timeout);
   }, [isOnScreen, holdTime]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     _onScreen(_isCovering);
   }, [_isCovering]);
 
