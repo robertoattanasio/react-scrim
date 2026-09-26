@@ -17,7 +17,7 @@ npm install react-scrim
 ```ts
 import { createScrim } from "react-scrim";
 
-export const scrim = createScrim({
+export const scrimRouteConfig = createScrim({
   nodes: ["curtain"],
   animation: { duration: 650, easing: "cubic-bezier(0.65, 0, 0.35, 1)" },
   hold: 1000,
@@ -34,23 +34,23 @@ export const scrim = createScrim({
 ```
 
 ```tsx
-<div ref={scrim.node("curtain")} className="fixed inset-0" />
+<div ref={scrimRouteConfig.node("curtain")} className="fixed inset-0" />
 ```
 
 ```ts
 export const Route = createFileRoute("/about")({
-  loader: () => scrim.cover(),
+  loader: () => scrimRouteConfig.cover(),
 });
 ```
 
 ```ts
-router.subscribe("onResolved", () => scrim.uncover());
+router.subscribe("onResolved", () => scrimRouteConfig.uncover());
 ```
 
 ```tsx
 import { useScrim } from "react-scrim";
 
-const { status, isReady } = useScrim(scrim);
+const { status, isReady } = useScrim(scrimRouteConfig);
 ```
 
 ## Options

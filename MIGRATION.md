@@ -17,7 +17,7 @@ import { createScrim } from "react-scrim";
 
 export const SCRIM_NODE_CURTAIN = "curtain";
 
-export const scrimRoute = createScrim({
+export const scrimRouteConfig = createScrim({
   nodes: [SCRIM_NODE_CURTAIN],
   animation: { duration: 650, easing: "cubic-bezier(0.65, 0, 0.35, 1)" },
   hold: 1000,
@@ -44,7 +44,7 @@ Replace each `<Scrim …>` with its own component, named `Scrim<Name>` (for exam
 </Scrim>
 
 // after
-<div ref={scrimRoute.node(SCRIM_NODE_CURTAIN)} aria-hidden className="fixed inset-0 z-9999">
+<div ref={scrimRouteConfig.node(SCRIM_NODE_CURTAIN)} aria-hidden className="fixed inset-0 z-9999">
   <SplashContent />
 </div>
 ```
@@ -83,14 +83,14 @@ Search for `loader: scrimRouteLoader` and for any `scrimLoader(…)` used as a r
 
 ```ts
 export const Route = createFileRoute("/about")({
-  loader: () => scrimRoute.cover(),
+  loader: () => scrimRouteConfig.cover(),
 });
 ```
 
 Then uncover when the router has resolved, where the router is created:
 
 ```ts
-if (typeof window !== "undefined") router.subscribe("onResolved", () => scrimRoute.uncover());
+if (typeof window !== "undefined") router.subscribe("onResolved", () => scrimRouteConfig.uncover());
 ```
 
 Delete the router selector that computed `isLoading` for the scrim.
@@ -102,7 +102,7 @@ For anything that is not a route, such as a global operation, call `cover()` bef
 Search for `onStatus`. Read the state with the hook instead:
 
 ```tsx
-const { status, isReady } = useScrim(scrimRoute);
+const { status, isReady } = useScrim(scrimRouteConfig);
 ```
 
 | 0.3 `onStatus`         | 0.4                            |
@@ -127,7 +127,7 @@ leave: ({ curtain, page }, { play }) =>
 ```
 
 ```tsx
-<main ref={scrimRoute.node(SCRIM_NODE_PAGE)}>
+<main ref={scrimRouteConfig.node(SCRIM_NODE_PAGE)}>
 ```
 
 Motion or GSAP can stay: `enter` and `leave` accept anything that can be awaited.
