@@ -1,5 +1,22 @@
 # react-scrim
 
+## 0.4.0
+
+Replace the `Scrim` component with a store. See `MIGRATION.md`.
+
+### Breaking Changes
+
+- `Scrim`, `scrimLoader` and the CSS are removed. `createScrim` declares the nodes, the `enter` and `leave` animations, `until` and `hold` in one place, and returns a store.
+- `isLoading` is replaced by `cover()` and `uncover()`: a route loader awaits `cover()` and the router calls `uncover()` once resolved.
+- `onStatus` is replaced by `useScrim`, which returns `status` (`idle`, `entering`, `covered`, `leaving`) and `isReady`.
+- `durationTime` becomes `animation.duration`, `holdTime` becomes `hold`, and `isReady` becomes `initial: "idle"`.
+
+### Minor Changes
+
+- `enter` and `leave` receive `play`, a Web Animations helper with the store's defaults. Anything that can be awaited works in its place, so GSAP and Motion can drive the nodes.
+- `status` reports when animations finish, not only when they start.
+- A store goes back to its initial status when one of its nodes unmounts and nothing replaces it.
+
 ## 0.3.1
 
 ### Patch Changes

@@ -1,4 +1,4 @@
-export { Scrim } from "./components/scrim.js";
-export { scrimLoader } from "./utils/scrim_loader.js";
+export { createScrim } from "./scrim/scrim.js";
+export { useScrim } from "./hooks/use_scrim.js";
 
-export type { ScrimProps, ScrimSignal, ScrimStatus } from "./components/type.js";
+export type { CreateScrimOptions, Scrim, ScrimNodes, ScrimPlay, ScrimStatus } from "./scrim/type.js";

@@ -1,7 +1,7 @@
 {
   "name": "react-scrim",
-  "version": "0.3.1",
-  "description": "CSS-native scrim for React: a covering layer whose state is data attributes, so the animation stays in your stylesheet.",
+  "version": "0.4.0",
+  "description": "A scrim store for React: declare the nodes and how they animate once, then cover and uncover from anywhere, route loaders included.",
   "keywords": [
     "react",
     "scrim",
@@ -9,7 +9,7 @@
     "curtain",
     "transition",
     "route-transition",
-    "css",
+    "web-animations",
     "typescript"
   ],
   "license": "MIT",
@@ -26,15 +26,12 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "files": [
-    "src",
-    "css.d.ts"
+    "src"
   ],
   "workspaces": [
     "."
   ],
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "sideEffects": false,
   "engines": {
     "node": ">=18"
   },

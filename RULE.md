@@ -4,50 +4,42 @@ How react-scrim code is written.
 
 ## Files
 
-Flat under `src/`, in `snake_case`:
+One factory and one hook:
 
 ```
-components/
-  scrim.tsx         the component
-  scrim.css         the base rules
-  type.ts           its props and status
-utils/
-  scrim_loader.ts   the timing utility
-index.ts            the only barrel
+src/
+  scrim/
+    scrim.ts        the factory
+    type.ts         its options, its return, the status
+  hooks/
+    use_scrim.ts    the hook that reads a store
+  index.ts          the only barrel
 ```
+
+Relative imports end in `.js`, and types are imported with `import type`.
 
 ## Naming
 
-| what       | convention             | example                 |
-| ---------- | ---------------------- | ----------------------- |
-| file       | `snake_case`           | `utils/scrim_loader.ts` |
-| component  | `PascalCase`           | `Scrim`                 |
-| utility    | `scrim<Noun>`          | `scrimLoader`           |
-| props type | `<Component>Props`     | `ScrimProps`            |
-| status     | `<state>` string union | `"covering"`            |
-| attribute  | `data-scrim-<state>`   | `data-scrim-ready`      |
-| prop in    | `is<State>`            | `isLoading`             |
-| prop out   | `on<Noun>`             | `onStatus`              |
-| state      | `_is<State>`           | `_isLoading`            |
+| what         | convention           | example              |
+| ------------ | -------------------- | -------------------- |
+| file         | `snake_case`         | `hooks/use_scrim.ts` |
+| factory      | `createScrim`        | `createScrim`        |
+| hook         | `useScrim`           | `useScrim`           |
+| type         | `Scrim*`             | `ScrimStatus`        |
+| options type | `CreateScrimOptions` | `CreateScrimOptions` |
+| generic      | `T<Noun>`            | `TName`              |
 
-Attributes are named for the state they describe: `data-scrim-instant`, not `data-scrim-skip-fade`.
+## The factory
 
-## Styles
+`createScrim` returns a store, not a component. It lives outside React, so route loaders, router events and plain functions can call it.
 
-- The component writes state as `data-scrim-*` attributes. Appearance and animation are the consumer's CSS.
-- `scrim.css` only covers the viewport, shows the element when open, reads the duration from `--scrim-duration` (300ms by default) and applies `transition: none` when instant.
-- Animations are transitions, not keyframes.
-- `durationTime` is written to `--scrim-duration`. `holdTime` stays in JavaScript: it delays when `_isCovering` turns false.
+- The status is one of `idle`, `entering`, `covered`, `leaving`. `cover` and `uncover` are the only ways to move it.
+- Nodes are named up front. A component registers one with `ref={scrim.node(name)}`, and the store starts once every node is registered.
+- `enter`, `leave` and `until` receive the nodes and a context. `play` in the context runs a Web Animation with the store's defaults and returns its `finished` promise. Anything that can be awaited works in its place.
+- Every `cover` and `uncover` takes a new run id. A step whose run is no longer current does nothing.
+- When a node unmounts and nothing replaces it in the same commit, the store goes back to `initial`.
+- On the server `cover` returns nothing and the status stays `initial`.
 
-## State
+## The hook
 
-- `_isReady` latches when `until` resolves, or immediately with `isReady`, and never goes back.
-- `_isLoading` turns true two animation frames after `isLoading`, so the incoming variant is applied without a transition first. Both frames are cancelled on cleanup.
-- `_isCovering` drives `data-scrim-open`. It follows the covering state at once when it turns on, and after `holdTime` when it turns off.
-- Async work that can resolve after unmount is guarded by a `cancelled` flag.
-- `onStatus` is the only callback.
-
-## Code
-
-- No imperative DOM writes: everything is rendered as attributes or an inline custom property.
-- No comments.
+`useScrim` reads `status` and `isReady` through `useSyncExternalStore`, one call each. It uses the store's own getters as the server snapshot.
