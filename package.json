@@ -1,6 +1,6 @@
 {
   "name": "react-scrim",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "A scrim store for React: declare the nodes and how they animate once, then cover and uncover from anywhere, route loaders included.",
   "keywords": [
     "react",
