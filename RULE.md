@@ -32,7 +32,7 @@ It keeps the order of the curtains and tells each one its phase. Nothing else.
 - Every `cover` adds a curtain on top. A curtain on screen never restarts or reverses.
 - When the top curtain has covered, the curtains below it are unmounted.
 - `uncover` only moves the top curtain: its `until`, then its `hold`, then `leaving`.
-- `meta` is carried, never read.
+- `key` and `meta` are carried, never read. `key` is read back by `getStatus` and `useStatus`, so the app can tell which curtain is on top.
 - A curtain's `scrim` prop keeps its identity until its phase changes.
 
 What to cover, when, and how the page reacts belongs to the app.

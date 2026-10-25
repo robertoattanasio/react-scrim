@@ -6,9 +6,6 @@ export type ScrimLayer<TMeta> = {
   id: number;
   curtain: ScrimCurtain<TMeta>;
   options: ScrimOptions<TMeta>;
-  meta: Readonly<TMeta>;
-  phase: ScrimPhase;
-  done: (event?: SyntheticEvent) => void;
   scrim: ScrimProps<TMeta>["scrim"];
 };
 
@@ -16,8 +13,7 @@ export type ScrimStore<TMeta> = ReturnType<typeof createScrimStore<TMeta>>;
 
 const layerPhased = <TMeta>(layer: ScrimLayer<TMeta>, phase: ScrimPhase): ScrimLayer<TMeta> => ({
   ...layer,
-  phase,
-  scrim: { phase, meta: layer.meta, done: layer.done },
+  scrim: { ...layer.scrim, phase },
 });
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -46,13 +42,15 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
       finishers.get(id)?.();
     };
 
-    const meta = options.meta ?? metaDefault;
-
-    return { id, curtain: component, options, meta, phase, done, scrim: { phase, meta, done } };
+    return { id, curtain: component, options, scrim: { phase, meta: options.meta ?? metaDefault, done } };
   };
 
   let layers: ScrimLayer<TMeta>[] = initial ? [layerCreate(initial, initialOptions, "covered")] : [];
-  let state: ScrimState<TMeta> = { status: layers.at(-1)?.phase ?? "idle", meta: layers.at(-1)?.meta ?? metaDefault };
+  let state: ScrimState<TMeta> = {
+    status: layers.at(-1)?.scrim.phase ?? "idle",
+    key: layers.at(-1)?.options.key,
+    meta: layers.at(-1)?.scrim.meta ?? metaDefault,
+  };
 
   const notify = () => listeners.forEach((listener) => listener());
 
@@ -60,20 +58,13 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
     layers = next;
 
     const top = layers.at(-1);
-    const status = top?.phase ?? "idle";
-    const meta = top?.meta ?? state.meta;
+    const status = top?.scrim.phase ?? "idle";
+    const key = top ? top.options.key : state.key;
+    const meta = top?.scrim.meta ?? state.meta;
 
-    if (status !== state.status || meta !== state.meta) state = { status, meta };
+    if (status !== state.status || key !== state.key || meta !== state.meta) state = { status, key, meta };
 
     notify();
-  };
-
-  const phaseSet = (layer: ScrimLayer<TMeta>, phase: ScrimPhase) => {
-    const next = layerPhased(layer, phase);
-
-    setLayers(layers.map((item) => (item.id === layer.id ? next : item)));
-
-    return next;
   };
 
   const finished = (id: number) =>
@@ -116,7 +107,7 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
     await covering.get(top.id);
 
     top = layers.at(-1);
-    if (!top || top.phase !== "covered") return;
+    if (!top || top.scrim.phase !== "covered") return;
 
     const id = ++run;
     const { hold = 0, until } = top.options;
@@ -127,7 +118,9 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
 
     const left = finished(top.id);
 
-    phaseSet(top, "leaving");
+    const leaving = layerPhased(top, "leaving");
+
+    setLayers(layers.map((item) => (item.id === leaving.id ? leaving : item)));
     await left;
 
     if (id === run) setLayers([]);

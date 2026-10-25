@@ -15,6 +15,7 @@ export type ScrimProps<TMeta = undefined> = {
 export type ScrimCurtain<TMeta = undefined> = ComponentType<ScrimProps<TMeta>>;
 
 export type ScrimOptions<TMeta = undefined> = {
+  key?: string;
   hold?: number;
   until?: () => unknown;
   meta?: TMeta;
@@ -22,6 +23,7 @@ export type ScrimOptions<TMeta = undefined> = {
 
 export type ScrimState<TMeta = undefined> = {
   status: ScrimStatus;
+  key: string | undefined;
   meta: Readonly<TMeta>;
 };
 

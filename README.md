@@ -55,21 +55,22 @@ react-scrim doesn't know how long your animations take. It waits for `done()`, s
 
 `createScrim(initial?, options?)` returns:
 
-| member      | what it does                                         |
-| ----------- | ---------------------------------------------------- |
-| `Root`      | renders the app and the curtains on top of it        |
-| `cover`     | adds a curtain on top, resolves once it has covered  |
-| `uncover`   | lets the top curtain leave                           |
-| `useStatus` | `{ status, meta }` of the top curtain                |
-| `getStatus` | the same, outside React                              |
+| member      | what it does                                        |
+| ----------- | --------------------------------------------------- |
+| `Root`      | renders the app and the curtains on top of it       |
+| `cover`     | adds a curtain on top, resolves once it has covered |
+| `uncover`   | lets the top curtain leave                          |
+| `useStatus` | `{ status, key, meta }` of the top curtain          |
+| `getStatus` | the same, outside React                             |
 
 `initial` is a curtain already covering on the first paint. `cover` takes the same options:
 
-| option  | what it does                              |
-| ------- | ----------------------------------------- |
-| `hold`  | milliseconds to stay covered              |
-| `until` | something to wait for before leaving      |
-| `meta`  | your own data, read back by `useStatus`   |
+| option  | what it does                            |
+| ------- | --------------------------------------- |
+| `key`   | your own id, read back by `useStatus`   |
+| `hold`  | milliseconds to stay covered            |
+| `until` | something to wait for before leaving    |
+| `meta`  | your own data, read back by `useStatus` |
 
 A curtain receives `scrim.phase` (`"entering"`, `"covered"`, `"leaving"`), `scrim.meta` and `scrim.done`.
 
