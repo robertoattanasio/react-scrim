@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "react-scrim": "1.0.0"
+  },
+  "changesets": [
+    "scrim-components"
+  ]
+}

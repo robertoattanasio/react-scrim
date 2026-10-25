@@ -4,42 +4,35 @@ How react-scrim code is written.
 
 ## Files
 
-One factory and one hook:
-
 ```
 src/
   scrim/
-    scrim.ts        the factory
-    type.ts         its options, its return, the status
-  hooks/
-    use_scrim.ts    the hook that reads a store
-  index.ts          the only barrel
+    scrim.tsx        createScrim and the React side: Root, useStatus
+    scrim_store.ts   the stack of curtains, with no React in it
+    type.ts          the public types
+  index.ts           the only barrel
 ```
 
 Relative imports end in `.js`, and types are imported with `import type`.
 
 ## Naming
 
-| what         | convention           | example              |
-| ------------ | -------------------- | -------------------- |
-| file         | `snake_case`         | `hooks/use_scrim.ts` |
-| factory      | `createScrim`        | `createScrim`        |
-| hook         | `useScrim`           | `useScrim`           |
-| type         | `Scrim*`             | `ScrimStatus`        |
-| options type | `CreateScrimOptions` | `CreateScrimOptions` |
-| generic      | `T<Noun>`            | `TName`              |
+| what    | convention    | example          |
+| ------- | ------------- | ---------------- |
+| file    | `snake_case`  | `scrim_store.ts` |
+| factory | `createScrim` | `createScrim`    |
+| type    | `Scrim*`      | `ScrimStatus`    |
+| generic | `T<Noun>`     | `TMeta`          |
 
-## The factory
+## What the library does
 
-`createScrim` returns a store, not a component. It lives outside React, so route loaders, router events and plain functions can call it.
+It keeps the order of the curtains and tells each one its phase. Nothing else.
 
-- The status is one of `idle`, `entering`, `covered`, `leaving`. `cover` and `uncover` are the only ways to move it.
-- Nodes are named up front. A component registers one with `ref={scrim.node(name)}`, and the store starts once every node is registered.
-- `enter`, `leave` and `until` receive the nodes and a context. `play` in the context runs a Web Animation with the store's defaults and returns its `finished` promise. Anything that can be awaited works in its place.
-- Every `cover` and `uncover` takes a new run id. A step whose run is no longer current does nothing.
-- When a node unmounts and nothing replaces it in the same commit, the store goes back to `initial`.
-- On the server `cover` returns nothing and the status stays `initial`.
+- It never animates and never reads a duration. It waits for `done()`.
+- Every `cover` adds a curtain on top. A curtain on screen never restarts or reverses.
+- When the top curtain has covered, the curtains below it are unmounted.
+- `uncover` only moves the top curtain: its `until`, then its `hold`, then `leaving`.
+- `meta` is carried, never read.
+- A curtain's `scrim` prop keeps its identity until its phase changes.
 
-## The hook
-
-`useScrim` reads `status` and `isReady` through `useSyncExternalStore`, one call each. It uses the store's own getters as the server snapshot.
+What to cover, when, and how the page reacts belongs to the app.

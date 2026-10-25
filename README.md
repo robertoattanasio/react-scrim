@@ -1,6 +1,6 @@
 # react-scrim
 
-A scrim store for React. Declare the nodes and how they animate once, then cover and uncover from anywhere, route loaders included.
+Page transitions for React. Each transition is a component you animate however you like.
 
 Package: [npmjs.com/package/react-scrim](https://www.npmjs.com/package/react-scrim)
 
@@ -14,79 +14,66 @@ npm install react-scrim
 
 ## Usage
 
-```ts
-import { createScrim } from "react-scrim";
-
-export const scrimRouteConfig = createScrim({
-  nodes: ["curtain"],
-  animation: { duration: 650, easing: "cubic-bezier(0.65, 0, 0.35, 1)" },
-  hold: 1000,
-  until: () => document.fonts.ready,
-  enter: ({ curtain }, { status, play }) =>
-    play(
-      curtain,
-      status === "idle"
-        ? [{ transform: "translateY(100%)" }, { transform: "translateY(0)" }]
-        : [{ transform: "translateY(0)" }],
-    ),
-  leave: ({ curtain }, { play }) => play(curtain, [{ transform: "translateY(-100%)" }]),
-});
-```
+Write a curtain. It gets its `phase` and calls `done()` when its animation ends:
 
 ```tsx
-<div ref={scrimRouteConfig.node("curtain")} className="fixed inset-0" />
+const Curtain = ({ scrim }: ScrimProps) => (
+  <motion.div
+    className="fixed inset-0 bg-black"
+    initial={{ x: "-100%" }}
+    animate={{ x: scrim.phase === "leaving" ? "100%" : "0%" }}
+    onAnimationComplete={() => scrim.done()}
+  />
+);
 ```
 
-```ts
-export const Route = createFileRoute("/about")({
-  loader: () => scrimRouteConfig.cover(),
-});
-```
-
-```ts
-router.subscribe("onResolved", () => scrimRouteConfig.uncover());
-```
+Create the scrim and put its `Root` around the app:
 
 ```tsx
-import { useScrim } from "react-scrim";
+export const AppScrim = createScrim();
 
-const { status, isReady } = useScrim(scrimRouteConfig);
+<AppScrim.Root>
+  <App />
+</AppScrim.Root>;
 ```
 
-## Timing
+Cover before the page changes, uncover when it's ready:
 
-The store has no idea how long anything takes. `cover` and `uncover` don't carry a duration — they call `enter`/`leave` and wait for whatever those return, which in practice is `play`'s return value: the same `Animation.finished` promise the browser resolves once the animation actually on screen has actually finished. There's nowhere else the time is written down, so there's nothing to keep in sync — no CSS duration to match against a JS timer, no `transitionend` that fires twice for two properties or not at all when an animation is replaced mid-flight.
+```ts
+await AppScrim.cover(Curtain);
 
-`leave` can compose more than one `play` call — a curtain and a page, each with its own delay, duration and easing — and `uncover` still just awaits the result. It doesn't know either duration; it waits for whichever finishes last. The choreography is a consequence of what's composed, not a number anyone maintains.
+AppScrim.uncover();
+```
 
-`hold` is the one exception: a fixed pause the store keeps for itself, deliberately, between being ready and starting to leave.
+## How it works
 
-Why this also means an interrupted navigation just works: [dev.robertoattanasio.com/react-scrim](https://dev.robertoattanasio.com/react-scrim#section-the-problem) for the idea, [/react-scrim/create-scrim#section-interruptions](https://dev.robertoattanasio.com/react-scrim/create-scrim#section-interruptions) for how.
+Every `cover()` puts a new curtain on top. Curtains already on screen never restart, so fast navigations always look the same.
 
-## Options
+react-scrim doesn't know how long your animations take. It waits for `done()`, so CSS, Motion, GSAP and the Web Animations API all work.
 
-| option      | what it does                                                                                  |
-| ----------- | --------------------------------------------------------------------------------------------- |
-| `nodes`     | the names of the nodes the store animates                                                     |
-| `initial`   | `"covered"` (default) starts covering, for a splash. `"idle"` starts uncovered                |
-| `animation` | default options for every `play` call                                                         |
-| `hold`      | milliseconds to stay covered before leaving                                                   |
-| `until`     | what to wait for before the first leave                                                       |
-| `enter`     | the enter animation. `status` is `"idle"` when starting from rest, `"leaving"` when reversing |
-| `leave`     | the leave animation                                                                           |
+## API
 
-`enter`, `leave` and `until` can return anything that can be awaited, so GSAP and Motion work in place of `play`.
+`createScrim(initial?, options?)` returns:
 
-## Store
+| member      | what it does                                         |
+| ----------- | ---------------------------------------------------- |
+| `Root`      | renders the app and the curtains on top of it        |
+| `cover`     | adds a curtain on top, resolves once it has covered  |
+| `uncover`   | lets the top curtain leave                           |
+| `useStatus` | `{ status, meta }` of the top curtain                |
+| `getStatus` | the same, outside React                              |
 
-| method         | what it does                                       |
-| -------------- | -------------------------------------------------- |
-| `node(name)`   | a ref that registers a node                        |
-| `cover()`      | runs `enter`. Resolves once covered                |
-| `uncover()`    | waits for `until` and `hold`, then runs `leave`    |
-| `subscribe`    | listens to every change                            |
-| `getStatus()`  | `"idle"`, `"entering"`, `"covered"` or `"leaving"` |
-| `getIsReady()` | `true` once `until` has resolved                   |
+`initial` is a curtain already covering on the first paint. `cover` takes the same options:
+
+| option  | what it does                              |
+| ------- | ----------------------------------------- |
+| `hold`  | milliseconds to stay covered              |
+| `until` | something to wait for before leaving      |
+| `meta`  | your own data, read back by `useStatus`   |
+
+A curtain receives `scrim.phase` (`"entering"`, `"covered"`, `"leaving"`), `scrim.meta` and `scrim.done`.
+
+Routing, `meta` and full examples are in the [documentation](https://dev.robertoattanasio.com/react-scrim).
 
 ## License
 

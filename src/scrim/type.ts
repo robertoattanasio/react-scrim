@@ -1,28 +1,34 @@
-export type ScrimStatus = "idle" | "entering" | "covered" | "leaving";
+import type { ComponentType, ReactNode, SyntheticEvent } from "react";
 
-export type ScrimNodes<TName extends string> = Record<TName, HTMLElement>;
+export type ScrimPhase = "entering" | "covered" | "leaving";
 
-export type ScrimPlay = (
-  element: HTMLElement,
-  keyframes: Keyframe[],
-  options?: KeyframeAnimationOptions,
-) => Promise<Animation>;
+export type ScrimStatus = ScrimPhase | "idle";
 
-export type CreateScrimOptions<TName extends string> = {
-  nodes: readonly TName[];
-  initial?: Extract<ScrimStatus, "covered" | "idle">;
-  animation?: KeyframeAnimationOptions;
-  hold?: number;
-  until?: (nodes: ScrimNodes<TName>, context: { play: ScrimPlay }) => unknown;
-  enter: (nodes: ScrimNodes<TName>, context: { play: ScrimPlay; status: ScrimStatus }) => unknown;
-  leave: (nodes: ScrimNodes<TName>, context: { play: ScrimPlay }) => unknown;
+export type ScrimProps<TMeta = undefined> = {
+  scrim: {
+    phase: ScrimPhase;
+    meta: Readonly<TMeta>;
+    done: (event?: SyntheticEvent) => void;
+  };
 };
 
-export type Scrim<TName extends string> = {
-  node: (name: TName) => (element: HTMLElement | null) => (() => void) | undefined;
-  cover: () => Promise<void> | undefined;
+export type ScrimCurtain<TMeta = undefined> = ComponentType<ScrimProps<TMeta>>;
+
+export type ScrimOptions<TMeta = undefined> = {
+  hold?: number;
+  until?: () => unknown;
+  meta?: TMeta;
+};
+
+export type ScrimState<TMeta = undefined> = {
+  status: ScrimStatus;
+  meta: Readonly<TMeta>;
+};
+
+export type Scrim<TMeta = undefined> = {
+  Root: (props: { children: ReactNode }) => ReactNode;
+  cover: (curtain: ScrimCurtain<TMeta>, options?: ScrimOptions<TMeta>) => Promise<void>;
   uncover: () => Promise<void>;
-  subscribe: (listener: () => void) => () => void;
-  getStatus: () => ScrimStatus;
-  getIsReady: () => boolean;
+  getStatus: () => ScrimState<TMeta> | undefined;
+  useStatus: () => ScrimState<TMeta>;
 };
