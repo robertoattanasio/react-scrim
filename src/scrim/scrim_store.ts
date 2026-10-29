@@ -6,6 +6,7 @@ export type ScrimLayer<TMeta> = {
   id: number;
   curtain: ScrimCurtain<TMeta>;
   options: ScrimOptions<TMeta>;
+  ready: boolean;
   scrim: ScrimProps<TMeta>["scrim"];
 };
 
@@ -42,12 +43,19 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
       finishers.get(id)?.();
     };
 
-    return { id, curtain: component, options, scrim: { phase, meta: options.meta ?? metaDefault, done } };
+    return {
+      id,
+      curtain: component,
+      options,
+      ready: false,
+      scrim: { phase, meta: options.meta ?? metaDefault, done },
+    };
   };
 
   let layers: ScrimLayer<TMeta>[] = initial ? [layerCreate(initial, initialOptions, "covered")] : [];
   let state: ScrimState<TMeta> = {
     status: layers.at(-1)?.scrim.phase ?? "idle",
+    ready: layers.at(-1)?.ready ?? true,
     key: layers.at(-1)?.options.key,
     meta: layers.at(-1)?.scrim.meta ?? metaDefault,
   };
@@ -59,10 +67,12 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
 
     const top = layers.at(-1);
     const status = top?.scrim.phase ?? "idle";
+    const ready = top?.ready ?? true;
     const key = top ? top.options.key : state.key;
     const meta = top?.scrim.meta ?? state.meta;
 
-    if (status !== state.status || key !== state.key || meta !== state.meta) state = { status, key, meta };
+    if (status !== state.status || ready !== state.ready || key !== state.key || meta !== state.meta)
+      state = { status, ready, key, meta };
 
     notify();
   };
@@ -113,14 +123,16 @@ export const createScrimStore = <TMeta>(initial?: ScrimCurtain<TMeta>, initialOp
     const { hold = 0, until } = top.options;
 
     await until?.();
+
+    const topId = top.id;
+    setLayers(layers.map((item) => (item.id === topId ? { ...item, ready: true } : item)));
+
     await wait(hold);
     if (id !== run) return;
 
-    const left = finished(top.id);
+    const left = finished(topId);
 
-    const leaving = layerPhased(top, "leaving");
-
-    setLayers(layers.map((item) => (item.id === leaving.id ? leaving : item)));
+    setLayers(layers.map((item) => (item.id === topId ? layerPhased(item, "leaving") : item)));
     await left;
 
     if (id === run) setLayers([]);

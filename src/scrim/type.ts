@@ -23,6 +23,7 @@ export type ScrimOptions<TMeta = undefined> = {
 
 export type ScrimState<TMeta = undefined> = {
   status: ScrimStatus;
+  ready: boolean;
   key: string | undefined;
   meta: Readonly<TMeta>;
 };
