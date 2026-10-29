@@ -1,6 +1,6 @@
 {
   "name": "react-scrim",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Page transitions for React. Each transition is a component you animate however you like.",
   "keywords": [
     "react",
