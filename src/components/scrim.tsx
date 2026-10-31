@@ -4,9 +4,9 @@ import { useMemo } from "react";
 
 import { SCRIM_ACTIONS_CONTEXT, SCRIM_STATE_CONTEXT } from "../constants/scrim.js";
 import { useScrimTimeline } from "../hooks/use_scrim_timeline.js";
-import type { ScrimComponentProps } from "../types/scrim.js";
+import type { ScrimComponentProps, ScrimMeta } from "../types/scrim.js";
 
-export const Scrim = <TMeta = undefined,>({
+export const Scrim = <TMeta = ScrimMeta,>({
   children,
   curtain: Curtain,
   initial = "covered",

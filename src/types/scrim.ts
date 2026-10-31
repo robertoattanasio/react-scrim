@@ -6,9 +6,13 @@ export type ScrimStatus = ScrimPhase | "idle";
 
 export type ScrimInitial = "covered" | "idle";
 
+export interface ScrimRegister {}
+
+export type ScrimMeta = ScrimRegister extends { meta: infer TMeta } ? TMeta : undefined;
+
 export type ScrimDone = (event?: SyntheticEvent) => void;
 
-export type ScrimProps<TMeta = undefined> = {
+export type ScrimProps<TMeta = ScrimMeta> = {
   scrim: {
     phase: ScrimPhase;
     meta: TMeta;
@@ -16,14 +20,14 @@ export type ScrimProps<TMeta = undefined> = {
   };
 };
 
-export type ScrimCurtain<TMeta = undefined> = ComponentType<ScrimProps<TMeta>>;
+export type ScrimCurtain<TMeta = ScrimMeta> = ComponentType<ScrimProps<TMeta>>;
 
 export type ScrimTiming = {
   hold?: number;
   until?: (signal: AbortSignal) => Promise<unknown>;
 };
 
-export type ScrimComponentProps<TMeta = undefined> = ScrimTiming & {
+export type ScrimComponentProps<TMeta = ScrimMeta> = ScrimTiming & {
   children?: ReactNode;
   curtain: ScrimCurtain<TMeta>;
   initial?: ScrimInitial;
@@ -41,8 +45,8 @@ export type ScrimActions = {
   uncover: () => Promise<void>;
 };
 
-export type ScrimStateValue<TMeta = undefined> = ScrimTimeline & {
+export type ScrimStateValue<TMeta = ScrimMeta> = ScrimTimeline & {
   meta: TMeta;
 };
 
-export type ScrimValue<TMeta = undefined> = ScrimStateValue<TMeta> & ScrimActions;
+export type ScrimValue<TMeta = ScrimMeta> = ScrimStateValue<TMeta> & ScrimActions;
