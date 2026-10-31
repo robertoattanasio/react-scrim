@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "unstable",
+  "initialVersions": {
+    "react-scrim": "2.1.0"
+  },
+  "changesets": [
+    "scrim-provider"
+  ]
+}

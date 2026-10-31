@@ -1,11 +1,17 @@
-export { createScrim } from "./scrim/scrim.js";
+export { Scrim } from "./components/scrim.js";
+export { useScrim } from "./hooks/use_scrim.js";
+export { useScrimActions } from "./hooks/use_scrim_actions.js";
 
 export type {
-  Scrim,
+  ScrimActions,
+  ScrimComponentProps,
   ScrimCurtain,
-  ScrimOptions,
+  ScrimInitial,
   ScrimPhase,
   ScrimProps,
-  ScrimState,
+  ScrimStateValue,
   ScrimStatus,
-} from "./scrim/type.js";
+  ScrimTimeline,
+  ScrimTiming,
+  ScrimValue,
+} from "./types/scrim.js";
