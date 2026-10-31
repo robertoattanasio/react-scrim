@@ -1,26 +1,5 @@
 # react-scrim
 
-## 3.0.0-unstable.1
-### Minor Changes
-
-- `ScrimRegister` types `meta` once for the whole app through module augmentation, so `useScrim` and `ScrimProps` don't need a generic. It is optional, and an explicit generic still wins.
-
-## 3.0.0-unstable.0
-
-### Major Changes
-
-- A scrim is now a provider around its subtree instead of a global store.
-
-  - `createScrim`, `Root`, `useStatus` and `getStatus` are removed. Mount `<Scrim curtain={Curtain}>` and read it with `useScrim`.
-  - `useScrimActions` returns only `cover` and `uncover`, and doesn't re-render when the phase changes.
-  - `cover()` no longer stacks curtains: a `cover` during `leaving` sends the same curtain back.
-  - `key` is removed. `hold`, `until` and `meta` are props of `Scrim`.
-  - `useScrim` returns `first`, `true` while the initial curtain is on screen.
-  - `until` receives an `AbortSignal`, and its errors go to `reportError`.
-  - `cover` and `uncover` resolve when `Scrim` unmounts.
-  - A `done()` left over from a previous phase is ignored.
-  - The peer range is now React `^19.2.0`.
-
 ## 2.1.0
 
 ### Minor Changes
