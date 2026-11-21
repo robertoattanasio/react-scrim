@@ -79,7 +79,7 @@ const { status, meta } = AppScrim.useStatus();
 AppScrim.getStatus()?.status;
 ```
 
-The statuses keep their names. `isReady` is gone: the first curtain only leaves once `until` has resolved.
+The statuses keep their names. `isReady` becomes `ready`, added in 2.1: `true` once the top curtain's `until` has resolved.
 
 ## Page nodes become status reads
 

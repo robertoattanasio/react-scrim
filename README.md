@@ -1,35 +1,24 @@
 # react-scrim
 
-Page transitions for React. Each transition is a component you animate however you like.
+`react-scrim` helps coordinate page transitions in React. You provide a curtain component and its animation; the scrim keeps track of when the curtain covers the page and when it can leave. Call `cover` and `uncover` wherever you need them, including from a route loader. If transitions overlap, the scrim keeps the curtains in order.
 
 Package: [npmjs.com/package/react-scrim](https://www.npmjs.com/package/react-scrim)
 
 Documentation: [dev.robertoattanasio.com/react-scrim](https://dev.robertoattanasio.com/react-scrim)
 
-## Install
+## Installation
 
 ```sh
 npm install react-scrim
 ```
 
-## Usage
+React 19 and React DOM 19 are required as peer dependencies.
 
-Write a curtain. It gets its `phase` and calls `done()` when its animation ends:
-
-```tsx
-const Curtain = ({ scrim }: ScrimProps) => (
-  <motion.div
-    className="fixed inset-0 bg-black"
-    initial={{ x: "-100%" }}
-    animate={{ x: scrim.phase === "leaving" ? "100%" : "0%" }}
-    onAnimationComplete={() => scrim.done()}
-  />
-);
-```
-
-Create the scrim and put its `Root` around the app:
+Create a scrim and mount its `Root` around your app:
 
 ```tsx
+import { createScrim } from "react-scrim";
+
 export const AppScrim = createScrim();
 
 <AppScrim.Root>
@@ -37,47 +26,29 @@ export const AppScrim = createScrim();
 </AppScrim.Root>;
 ```
 
-Cover before the page changes, uncover when it's ready:
+Use `cover` and `uncover` to put a curtain around a navigation:
 
 ```ts
 await AppScrim.cover(Curtain);
-
-AppScrim.uncover();
+await navigate(to);
+await AppScrim.uncover();
 ```
-
-## How it works
-
-Every `cover()` puts a new curtain on top. Curtains already on screen never restart, so fast navigations always look the same.
-
-react-scrim doesn't know how long your animations take. It waits for `done()`, so CSS, Motion, GSAP and the Web Animations API all work.
 
 ## API
 
-`createScrim(initial?, options?)` returns:
+These guides explain how to create and control a scrim, and how to build the curtain component it displays:
 
-| member      | what it does                                        |
-| ----------- | --------------------------------------------------- |
-| `Root`      | renders the app and the curtains on top of it       |
-| `cover`     | adds a curtain on top, resolves once it has covered |
-| `uncover`   | lets the top curtain leave                          |
-| `useStatus` | `{ status, ready, key, meta }` of the top curtain   |
-| `getStatus` | the same, outside React                             |
+- [createScrim](./docs/create-scrim.md)
+- [Curtain](./docs/curtain.md): the component you write
+- [cover and uncover](./docs/cover-uncover.md)
+- [useStatus and getStatus](./docs/status.md)
+- [Stack](./docs/stack.md): what happens when curtains overlap
+- [Migrating from 1.x](./docs/migration.md)
 
-`initial` is a curtain already covering on the first paint. `cover` takes the same options:
+## Scripts
 
-| option  | what it does                            |
-| ------- | --------------------------------------- |
-| `key`   | your own id, read back by `useStatus`   |
-| `hold`  | milliseconds to stay covered            |
-| `until` | something to wait for before leaving    |
-| `meta`  | your own data, read back by `useStatus` |
-
-`ready` turns `true` once the top curtain's `until` has resolved, before its `hold`. It is `true` when no curtain is on screen.
-
-A curtain receives `scrim.phase` (`"entering"`, `"covered"`, `"leaving"`), `scrim.meta` and `scrim.done`.
-
-Routing, `meta` and full examples are in the [documentation](https://dev.robertoattanasio.com/react-scrim).
+For the available project scripts and what they do, see [docs/scripts.md](./docs/scripts.md).
 
 ## License
 
-MIT
+[MIT](./LICENSE)
