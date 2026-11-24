@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 
-import { createScrimStore } from "./scrim_store.js";
-import type { ScrimStore } from "./scrim_store.js";
+import { createScrimStore } from "./scrim-store.js";
+import type { ScrimStore } from "./scrim-store.js";
 import type { Scrim, ScrimCurtain, ScrimOptions } from "./type.js";
 
 export const createScrim = <TMeta = undefined,>(

@@ -16,7 +16,7 @@ src/
   index.ts             the only barrel
   scrim/
     scrim.tsx          createScrim and the React side: Root, useStatus
-    scrim_store.ts     the stack of curtains, with no React in it
+    scrim-store.ts     the stack of curtains, with no React in it
     type.ts            the public types
 ```
 
@@ -24,7 +24,7 @@ src/
 
 | What    | Convention    | Example          |
 | ------- | ------------- | ---------------- |
-| file    | snake_case    | `scrim_store.ts` |
+| file    | kebab-case    | `scrim-store.ts` |
 | factory | `createScrim` | `createScrim`    |
 | type    | `Scrim*`      | `ScrimStatus`    |
 | generic | `T<Noun>`     | `TMeta`          |
@@ -46,7 +46,7 @@ What to cover, when, and how the page reacts belongs to the app.
 
 ## Conventions
 
-- `scrim_store.ts` has no React import. `scrim.tsx` connects it with `useSyncExternalStore`.
+- `scrim-store.ts` has no React import. `scrim.tsx` connects it with `useSyncExternalStore`.
 - Relative imports end in `.js`, types are imported with `import type`.
 - React and React DOM are peer dependencies. No other dependencies.
 - No comments in the code unless asked.
