@@ -1,5 +1,10 @@
 # react-scrim
 
+## 2.1.1
+### Patch Changes
+
+- Not maintained anymore: the README points to react-interlude, which covers loading screens and page transitions. The package keeps working as it is.
+
 ## 2.1.0
 
 ### Minor Changes

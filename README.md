@@ -1,10 +1,12 @@
 # react-scrim
 
+> **Not maintained.** `react-scrim` is no longer developed. For loading screens and page transitions in React, use [react-interlude](https://react-interlude.robertoattanasio.com): it covers the same ground, from the first load to every navigation. This package stays on npm and keeps working as it is, but it won't get new features or fixes.
+
 `react-scrim` helps coordinate page transitions in React. You provide a curtain component and its animation; the scrim keeps track of when the curtain covers the page and when it can leave. Call `cover` and `uncover` wherever you need them, including from a route loader. If transitions overlap, the scrim keeps the curtains in order.
 
 Package: [npmjs.com/package/react-scrim](https://www.npmjs.com/package/react-scrim)
 
-Documentation: [dev.robertoattanasio.com/react-scrim](https://dev.robertoattanasio.com/react-scrim)
+Documentation: this README and [docs/](./docs/)
 
 ## Installation
 
